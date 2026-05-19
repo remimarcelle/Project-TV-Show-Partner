@@ -3,19 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TV Show Project | My Name (My GitHub username)</title>
+    <title>TV Show Project | Tuan Nguyen</title>
     <link href="style.css" rel="stylesheet" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   </head>
 
   <body>
-    <div id="root">
-    </div>
+    <header>
+      <input type="text" id="search" placeholder="Search episodes..." />
+      <span id="episode-count"></span>
+      <select id="episode-selector"></select>
+    </header>
 
-    <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
+    <div id="root"></div>
+
     <script src="episodes.js"></script>
-
-    <!-- Loads YOUR javascript code -->
     <script src="script.js"></script>
   </body>
 </html>
