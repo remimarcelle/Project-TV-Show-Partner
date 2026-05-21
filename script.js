@@ -53,11 +53,18 @@ function loadEpisodesForShow(showId) {
 
   fetch(`https://api.tvmaze.com/shows/${showId}/episodes`)
     .then((response) => {
+      if (response.status === 404) {
+        return []; // treat as empty episode list
+      }
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       return response.json();
     })
     .then((episodes) => {
       episodesCache[showId] = episodes;
+      if (episodes.length === 0) {
+        rootElem.textContent = "No episodes available for this show.";
+        return;
+      }
       makePageForEpisodes(episodes);
       setupSearch(episodes);
       setupSelector(episodes);
@@ -66,6 +73,7 @@ function loadEpisodesForShow(showId) {
       rootElem.textContent = `Error loading episodes: ${error.message}`;
     });
 }
+
 
 function formatEpisodeCode(season, episode) {
   const s = String(season).padStart(2, "0");
@@ -88,7 +96,7 @@ function makePageForEpisodes(episodeList) {
     const code = formatEpisodeCode(episode.season, episode.number);
 
     card.innerHTML = `
-      <img src="${episode.image?.medium ?? ""}" alt="${episode.name}" />
+      <img src="${episode.image?.medium ?? "https://via.placeholder.com/210x295?text=No+Image"}" alt="${episode.name}" />
       <div class="episode-info">
         <h2>${episode.name}</h2>
         <p class="episode-code">${code}</p>
