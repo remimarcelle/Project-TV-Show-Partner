@@ -1,9 +1,70 @@
 //You can edit ALL of the code here
+const SHOWS_API = "https://api.tvmaze.com/shows/82/episodes";
+const episodesCache = {}; // store episodes by show ID so we dont have to re fetch
+// them
+
+
 function setup() {
-  const allEpisodes = getAllEpisodes();
-  makePageForEpisodes(allEpisodes);
-  setupSearch(allEpisodes); 
-  setupSelector(allEpisodes); 
+  const rootElem = document.getElementById("root");
+  rootElem.textContent = "Loading episodes, please wait...";
+  
+  fetch(SHOWS_API)
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP was not ok: ${response.status}`);
+      return response.json();
+    })
+    .then((shows) => {
+      shows.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+      setupShowSelector(shows);
+      loadEpisodesForShow(shows[0].id); // load first show by default
+    })
+    .catch((error) => {
+      rootElem.textContent = `Failed to load shows: ${error.message}`;
+    });
+}
+
+function setupShowSelector(shows) {
+  const selector = document.getElementById("show-selector");
+  selector.innerHTML = "";
+
+  for (const show of shows) {
+    const option = document.createElement("option");
+    option.value = show.id;
+    option.textContent = show.name;
+    selector.appendChild(option);
+  }
+
+  selector.addEventListener("change", () => {
+    loadEpisodesForShow(selector.value);
+  });
+}
+
+function loadEpisodesForShow(showId) {
+  const rootElem = document.getElementById("root");
+
+  if (episodesCache[showId]) {
+    makePageForEpisodes(episodesCache[showId]);
+    setupSearch(episodesCache[showId]);
+    setupSelector(episodesCache[showId]);
+    return;
+  }
+
+  rootElem.textContent = "Loading episodes...";
+
+  fetch(`https://api.tvmaze.com/shows/${showId}/episodes`)
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+      return response.json();
+    })
+    .then((episodes) => {
+      episodesCache[showId] = episodes;
+      makePageForEpisodes(episodes);
+      setupSearch(episodes);
+      setupSelector(episodes);
+    })
+    .catch((error) => {
+      rootElem.textContent = `Error loading episodes: ${error.message}`;
+    });
 }
 
 function formatEpisodeCode(season, episode) {
@@ -66,6 +127,7 @@ function setupSearch(allEpisodes) {
 
 function setupSelector(allEpisodes) {
   const selector = document.getElementById("episode-selector");
+  selector.innerHTML = ""; // clear options when switching shows
 
   const defaultOption = document.createElement("option");
   defaultOption.value = "";
