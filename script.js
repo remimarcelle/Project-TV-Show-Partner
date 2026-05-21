@@ -96,7 +96,7 @@ function makePageForEpisodes(episodeList) {
     const code = formatEpisodeCode(episode.season, episode.number);
 
     card.innerHTML = `
-      <img src="${episode.image?.medium ?? "https://via.placeholder.com/210x295?text=No+Image"}" alt="${episode.name}" />
+      <img src="${episode.image?.medium ?? "https://placehold.co/210x295?text=No+Image"}" alt="${episode.name}" />
       <div class="episode-info">
         <h2>${episode.name}</h2>
         <p class="episode-code">${code}</p>
