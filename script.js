@@ -6,74 +6,37 @@ const episodesCache = {}; // store episodes by show ID so we dont have to re fet
 
 function setup() {
   const rootElem = document.getElementById("root");
-  rootElem.textContent = "Loading episodes, please wait...";
-  
-  fetch(SHOWS_API)
-    .then((response) => {
-      if (!response.ok) throw new Error(`HTTP was not ok: ${response.status}`);
-      return response.json();
-    })
-    .then((shows) => {
-      shows.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-      setupShowSelector(shows);
-      loadEpisodesForShow(shows[0].id); // load first show by default
-    })
-    .catch((error) => {
-      rootElem.textContent = `Failed to load shows: ${error.message}`;
-    });
-}
+  const countDisplay = document.getElementById("episode-count");
 
-function setupShowSelector(shows) {
-  const selector = document.getElementById("show-selector");
-  selector.innerHTML = "";
-
-  for (const show of shows) {
-    const option = document.createElement("option");
-    option.value = show.id;
-    option.textContent = show.name;
-    selector.appendChild(option);
-  }
-
-  selector.addEventListener("change", () => {
-    loadEpisodesForShow(selector.value);
-  });
-}
-
-function loadEpisodesForShow(showId) {
-  const rootElem = document.getElementById("root");
-
-  if (episodesCache[showId]) {
-    makePageForEpisodes(episodesCache[showId]);
-    setupSearch(episodesCache[showId]);
-    setupSelector(episodesCache[showId]);
-    return;
-  }
-
+  // Show a loading message while we wait for the API
   rootElem.textContent = "Loading episodes...";
+  countDisplay.textContent = "Loading episodes...";
 
-  fetch(`https://api.tvmaze.com/shows/${showId}/episodes`)
+  fetch("https://api.tvmaze.com/shows/82/episodes")
     .then((response) => {
-      if (response.status === 404) {
-        return []; // treat as empty episode list
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
       }
-      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       return response.json();
     })
-    .then((episodes) => {
-      episodesCache[showId] = episodes;
-      if (episodes.length === 0) {
-        rootElem.textContent = "No episodes available for this show.";
-        return;
-      }
-      makePageForEpisodes(episodes);
-      setupSearch(episodes);
-      setupSelector(episodes);
+    .then((allEpisodes) => {
+      // Clear loading message
+      rootElem.innerHTML = "";
+
+      // Use the fetched data just like before
+      makePageForEpisodes(allEpisodes);
+      setupSearch(allEpisodes);
+      setupSelector(allEpisodes);
+
+      countDisplay.textContent = `Showing ${allEpisodes.length} episode(s)`;
     })
     .catch((error) => {
-      rootElem.textContent = `Error loading episodes: ${error.message}`;
+      console.error(error);
+      rootElem.textContent =
+        "Sorry, something went wrong while loading episodes. Please try again later.";
+      countDisplay.textContent = "Failed to load episodes.";
     });
 }
-
 
 function formatEpisodeCode(season, episode) {
   const s = String(season).padStart(2, "0");
