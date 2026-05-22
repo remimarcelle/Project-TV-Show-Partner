@@ -1,6 +1,6 @@
 //You can edit ALL of the code here
 const SHOWS_API = "https://api.tvmaze.com/shows";
-const episodesCache = {}; 
+const episodesCache = {};
 
 /**
  * Entry point for the app.
@@ -10,7 +10,6 @@ const episodesCache = {};
  *
  * @return {void}
  */
-
 
 function setup() {
   const rootElem = document.getElementById("root");
@@ -29,7 +28,9 @@ function setup() {
     })
     .then((shows) => {
       // LEVEL 400: sort shows alphabetically and populate show selector
-      shows.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+      shows.sort((a, b) =>
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+      );
       setupShowSelector(shows);
       loadEpisodesForShow(shows[0].id); // load first show by default
     })
@@ -92,7 +93,7 @@ function setupSearch(allEpisodes) {
     const filtered = allEpisodes.filter(
       (ep) =>
         ep.name.toLowerCase().includes(term) ||
-        (ep.summary ?? "").toLowerCase().includes(term)
+        (ep.summary ?? "").toLowerCase().includes(term),
     );
     makePageForEpisodes(filtered);
     countDisplay.textContent = `Showing ${filtered.length} of ${allEpisodes.length} episode(s)`;
