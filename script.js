@@ -1,9 +1,36 @@
 //You can edit ALL of the code here
 function setup() {
-  const allEpisodes = getAllEpisodes();
-  makePageForEpisodes(allEpisodes);
-  setupSearch(allEpisodes); 
-  setupSelector(allEpisodes); 
+  const rootElem = document.getElementById("root");
+  const countDisplay = document.getElementById("episode-count");
+
+  // Show a loading message while we wait for the API
+  rootElem.textContent = "Loading episodes...";
+  countDisplay.textContent = "Loading episodes...";
+
+  fetch("https://api.tvmaze.com/shows/82/episodes")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((allEpisodes) => {
+      // Clear loading message
+      rootElem.innerHTML = "";
+
+      // Use the fetched data just like before
+      makePageForEpisodes(allEpisodes);
+      setupSearch(allEpisodes);
+      setupSelector(allEpisodes);
+
+      countDisplay.textContent = `Showing ${allEpisodes.length} episode(s)`;
+    })
+    .catch((error) => {
+      console.error(error);
+      rootElem.textContent =
+        "Sorry, something went wrong while loading episodes. Please try again later.";
+      countDisplay.textContent = "Failed to load episodes.";
+    });
 }
 
 function formatEpisodeCode(season, episode) {
